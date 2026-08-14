@@ -45,7 +45,7 @@ export function NumericKeypad({ value, onChange, onSubmit, disabled = false }: N
           ))}
         </View>
       ))}
-      <Pressable accessibilityRole="button" onPress={onSubmit} style={({ pressed }) => [styles.submit, pressed ? styles.pressed : null, disabled ? styles.disabled : null]}>
+      <Pressable accessibilityRole="button" disabled={disabled} onPress={onSubmit} style={({ pressed }) => [styles.submit, pressed ? styles.pressed : null, disabled ? styles.disabled : null]}>
         <Text style={styles.submitLabel}>Submit</Text>
       </Pressable>
     </View>

@@ -13,9 +13,9 @@ const defaultProfile: UserProfile = {
   id: 'default-profile',
   firstName: 'Math Explorer',
   level: 1,
-  stars: 12,
-  xp: 120,
-  streakDays: 3,
+  stars: 0,
+  xp: 0,
+  streakDays: 0,
 };
 
 const defaultSettings: UserSettings = {

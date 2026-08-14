@@ -1,4 +1,4 @@
-import { DIFFICULTY_RANGES, SYMBOL_BY_OPERATION, TABLE_NUMBERS } from '@/src/constants/math';
+import { DIFFICULTY_RANGES, SYMBOL_BY_OPERATION } from '@/src/constants/math';
 import { MathOperation, MathQuestion, MultiplicationFact, PracticeSessionConfig } from '@/src/types/models';
 
 export type RandomSource = () => number;
@@ -89,18 +89,7 @@ export function generateDivisionQuestion(
   config: Pick<PracticeSessionConfig, 'difficulty' | 'selectedTables' | 'selectedFacts'>,
   rng: RandomSource = Math.random,
 ): MathQuestion {
-  const fact = config.selectedFacts?.length
-    ? config.selectedFacts[randomInt(0, config.selectedFacts.length - 1, rng)]
-    : config.selectedTables?.length
-      ? {
-          factor1: config.selectedTables[randomInt(0, config.selectedTables.length - 1, rng)],
-          factor2: randomInt(1, 12, rng),
-        }
-      : {
-          factor1: TABLE_NUMBERS[randomInt(0, TABLE_NUMBERS.length - 1, rng)],
-          factor2: TABLE_NUMBERS[randomInt(0, TABLE_NUMBERS.length - 1, rng)],
-        };
-
+  const fact = pickFact(config, rng);
   const dividend = fact.factor1 * fact.factor2;
   const useFirstFactorAsDivisor = rng() >= 0.5;
   const divisor = useFirstFactorAsDivisor ? fact.factor1 : fact.factor2;

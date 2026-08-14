@@ -1,4 +1,4 @@
-import { DailyGoal, MathOperation, MultiplicationFact } from '@/src/types/models';
+import { DailyGoal, MathOperation } from '@/src/types/models';
 
 export const TABLE_NUMBERS = Array.from({ length: 12 }, (_, index) => index + 1);
 
@@ -69,6 +69,3 @@ export const ENCOURAGING_FEEDBACK = {
 
 export const DEFAULT_SELECTED_TABLES = [2, 3, 4, 5];
 
-export const STARTER_FACTS: MultiplicationFact[] = TABLE_NUMBERS.flatMap((factor1) =>
-  TABLE_NUMBERS.map((factor2) => ({ factor1, factor2 })),
-);
