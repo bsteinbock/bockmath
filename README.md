@@ -86,6 +86,33 @@ npm test
 npm run doctor
 ```
 
+## EAS development and production builds
+
+Install the EAS CLI and link this app to an Expo project once:
+
+```bash
+npm install --global eas-cli
+eas login
+eas init
+eas update:configure
+```
+
+Build and install the development client and production app independently:
+
+```bash
+npm run build:dev
+npm run build:production
+```
+
+The development build uses the `com.bockmath.app.dev` identity and the `development` OTA channel. The production build uses `com.bockmath.app` and the `production` channel, so both can be installed on one device. Publish OTA updates to the matching installed app with:
+
+```bash
+npm run update:dev
+npm run update:production
+```
+
+For local development with the installed development client, use `npm run start:dev-client`.
+
 ## Notes
 
 - Multiplication facts can be tracked as commutative or directional facts from Settings.
