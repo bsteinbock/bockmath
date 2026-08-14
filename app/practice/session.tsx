@@ -41,7 +41,7 @@ export default function PracticeSessionScreen() {
   const [question, setQuestion] = useState<MathQuestion>();
   const [feedback, setFeedback] = useState<{ correct: boolean; message: string }>();
   const [remainingSeconds, setRemainingSeconds] = useState<number | null>(null);
-  const shownAtRef = useRef(Date.now());
+  const shownAtRef = useRef(0);
   const recentFactKeysRef = useRef<string[]>([]);
 
   const config = useMemo<PracticeSessionConfig>(() => {
