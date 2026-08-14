@@ -38,6 +38,7 @@ export function NumericKeypad({ value, onChange, onSubmit, disabled = false }: N
             <Pressable
               key={key}
               accessibilityRole="button"
+              accessibilityLabel={key === '⌫' ? 'Backspace' : key}
               onPress={() => handlePress(key)}
               style={({ pressed }) => [styles.key, pressed ? styles.pressed : null, disabled ? styles.disabled : null]}>
               <Text style={styles.keyLabel}>{key}</Text>

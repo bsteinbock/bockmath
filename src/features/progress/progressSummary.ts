@@ -78,7 +78,7 @@ export function getPracticeRecommendation(progress: UserProgress, commutative: b
     };
   }
 
-  const nextTable = tableSummaries.sort((left, right) => left.average - right.average)[0]?.table ?? 2;
+  const nextTable = [...tableSummaries].sort((left, right) => left.average - right.average)[0]?.table ?? 2;
 
   return weakestFact?.attempts
     ? {

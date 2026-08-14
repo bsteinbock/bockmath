@@ -1,12 +1,15 @@
 import { DailyGoal, DailyGoalStatus, UserProgress } from '@/src/types/models';
 
-function toDateKey(isoDate: string): string {
-  return isoDate.slice(0, 10);
+function toLocalDateKey(value: Date): string {
+  const year = value.getFullYear();
+  const month = String(value.getMonth() + 1).padStart(2, '0');
+  const day = String(value.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }
 
 export function getDailyGoalStatus(goal: DailyGoal, progress: UserProgress, now = new Date()): DailyGoalStatus {
-  const todayKey = toDateKey(now.toISOString());
-  const todaysResults = progress.recentResults.filter((result) => toDateKey(result.answeredAt) === todayKey);
+  const todayKey = toLocalDateKey(now);
+  const todaysResults = progress.recentResults.filter((result) => toLocalDateKey(new Date(result.answeredAt)) === todayKey);
 
   const current = goal.kind === 'questions'
     ? todaysResults.length
