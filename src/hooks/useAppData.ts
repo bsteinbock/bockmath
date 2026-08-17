@@ -6,24 +6,36 @@ import { AnswerResult, UserProfile, UserProgress, UserSettings } from '@/src/typ
 type AppDataState = {
   loading: boolean;
   error?: string;
+  profiles: UserProfile[];
   profile?: UserProfile;
   progress?: UserProgress;
   settings?: UserSettings;
 };
 
 export function useAppData() {
-  const [state, setState] = useState<AppDataState>({ loading: true });
+  const [state, setState] = useState<AppDataState>({ loading: true, profiles: [] });
 
   const refresh = useCallback(async () => {
     try {
-      const [profile, progress, settings] = await Promise.all([
+      const [profiles, profile] = await Promise.all([
+        localProgressRepository.getProfiles(),
         localProgressRepository.getProfile(),
+      ]);
+      if (!profile) {
+        setState({ loading: false, profiles });
+        return;
+      }
+      const [progress, settings] = await Promise.all([
         localProgressRepository.getProgress(),
         localProgressRepository.getSettings(),
       ]);
-      setState({ loading: false, profile, progress, settings });
+      setState({ loading: false, profiles, profile, progress, settings });
     } catch (error) {
-      setState({ loading: false, error: error instanceof Error ? error.message : 'Unable to load app data.' });
+      setState({
+        loading: false,
+        profiles: [],
+        error: error instanceof Error ? error.message : 'Unable to load app data.',
+      });
     }
   }, []);
 
@@ -31,10 +43,29 @@ export function useAppData() {
     void refresh();
   }, [refresh]);
 
-  const saveSettings = useCallback(async (settings: UserSettings) => {
-    await localProgressRepository.saveSettings(settings);
-    await refresh();
-  }, [refresh]);
+  const saveSettings = useCallback(
+    async (settings: UserSettings) => {
+      await localProgressRepository.saveSettings(settings);
+      await refresh();
+    },
+    [refresh],
+  );
+
+  const createProfile = useCallback(
+    async (firstName: string) => {
+      await localProgressRepository.createProfile(firstName);
+      await refresh();
+    },
+    [refresh],
+  );
+
+  const selectProfile = useCallback(
+    async (profileId: string) => {
+      await localProgressRepository.selectProfile(profileId);
+      await refresh();
+    },
+    [refresh],
+  );
 
   const recordAnswer = useCallback(async (answer: AnswerResult) => {
     const progress = await localProgressRepository.recordAnswer(answer);
@@ -45,6 +76,8 @@ export function useAppData() {
   return {
     ...state,
     refresh,
+    createProfile,
+    selectProfile,
     saveSettings,
     recordAnswer,
   };

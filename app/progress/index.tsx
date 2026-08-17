@@ -27,7 +27,11 @@ export default function ProgressScreen() {
 
   return (
     <Screen>
-      <SectionHeader title="Progress dashboard" subtitle="Track accuracy, streaks, daily goals, achievements, and multiplication growth." />
+      <SectionHeader
+        title="Progress dashboard"
+        subtitle="Track accuracy, streaks, daily goals, achievements, and multiplication growth."
+        userName={profile.firstName}
+      />
       <View style={styles.row}>
         <StatCard label="Questions Answered" value={String(progress.totalQuestions)} tone="info" />
         <StatCard label="Overall Accuracy" value={`${getOverallAccuracy(progress)}%`} tone="success" />
@@ -41,7 +45,9 @@ export default function ProgressScreen() {
         <Text style={styles.title}>Strongest facts</Text>
         {summary.strongest.map((fact) => (
           <View key={`${fact.factor1}-${fact.factor2}`} style={styles.factRow}>
-            <Text style={styles.text}>{fact.factor1} × {fact.factor2}</Text>
+            <Text style={styles.text}>
+              {fact.factor1} × {fact.factor2}
+            </Text>
             <MasteryBadge score={fact.masteryScore} />
           </View>
         ))}
@@ -51,7 +57,9 @@ export default function ProgressScreen() {
         <Text style={styles.title}>Weakest facts</Text>
         {summary.weakest.map((fact) => (
           <View key={`${fact.factor1}-${fact.factor2}`} style={styles.factRow}>
-            <Text style={styles.text}>{fact.factor1} × {fact.factor2}</Text>
+            <Text style={styles.text}>
+              {fact.factor1} × {fact.factor2}
+            </Text>
             <MasteryBadge score={fact.masteryScore} />
           </View>
         ))}
@@ -60,7 +68,9 @@ export default function ProgressScreen() {
       <Card>
         <Text style={styles.title}>Achievements</Text>
         {progress.achievements.map((achievement) => (
-          <Text key={achievement.id} style={styles.text}>{achievement.earnedAt ? '★' : '○'} {achievement.title}</Text>
+          <Text key={achievement.id} style={styles.text}>
+            {achievement.earnedAt ? '★' : '○'} {achievement.title}
+          </Text>
         ))}
       </Card>
 

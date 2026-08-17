@@ -40,6 +40,7 @@ export default function PracticeSessionScreen() {
   const [answer, setAnswer] = useState('');
   const [question, setQuestion] = useState<MathQuestion>();
   const [feedback, setFeedback] = useState<{ correct: boolean; message: string }>();
+  const [submitting, setSubmitting] = useState(false);
   const [remainingSeconds, setRemainingSeconds] = useState<number | null>(null);
   const shownAtRef = useRef(0);
   const recentFactKeysRef = useRef<string[]>([]);
@@ -82,22 +83,29 @@ export default function PracticeSessionScreen() {
     };
   }, [config, progress, settings]);
 
-  const finishSession = useCallback(() => {
-    const relevantResults = progress?.recentResults.slice(-Math.max(1, resultsCount)) ?? [];
-    const averageResponseTimeMs = relevantResults.length
-      ? Math.round(relevantResults.reduce((sum, result) => sum + result.responseTimeMs, 0) / relevantResults.length)
-      : 0;
+  const finishSession = useCallback(
+    (completedResultsCount = resultsCount, completedCorrectCount = correctCount) => {
+      const relevantResults = progress?.recentResults.slice(-Math.max(1, completedResultsCount)) ?? [];
+      const averageResponseTimeMs = relevantResults.length
+        ? Math.round(
+            relevantResults.reduce((sum, result) => sum + result.responseTimeMs, 0) / relevantResults.length,
+          )
+        : 0;
 
-    router.replace({
-      pathname: '/practice/results',
-      params: {
-        correct: String(correctCount),
-        total: String(resultsCount),
-        accuracy: String(resultsCount ? Math.round((correctCount / resultsCount) * 100) : 0),
-        averageResponseTimeMs: String(averageResponseTimeMs),
-      },
-    });
-  }, [correctCount, progress?.recentResults, resultsCount]);
+      router.replace({
+        pathname: '/practice/results',
+        params: {
+          correct: String(completedCorrectCount),
+          total: String(completedResultsCount),
+          accuracy: String(
+            completedResultsCount ? Math.round((completedCorrectCount / completedResultsCount) * 100) : 0,
+          ),
+          averageResponseTimeMs: String(averageResponseTimeMs),
+        },
+      });
+    },
+    [correctCount, progress?.recentResults, resultsCount],
+  );
 
   useEffect(() => {
     if (!question && buildQuestion) {
@@ -133,9 +141,9 @@ export default function PracticeSessionScreen() {
     }
   }, [finishSession, remainingSeconds]);
 
-  const moveToNextQuestion = () => {
-    if (resultsCount >= config.questionCount || remainingSeconds === 0) {
-      finishSession();
+  const moveToNextQuestion = (completedResultsCount = resultsCount, completedCorrectCount = correctCount) => {
+    if (completedResultsCount >= config.questionCount || remainingSeconds === 0) {
+      finishSession(completedResultsCount, completedCorrectCount);
       return;
     }
 
@@ -147,10 +155,11 @@ export default function PracticeSessionScreen() {
   };
 
   const handleSubmit = async () => {
-    if (!question || feedback) {
+    if (!question || feedback || submitting) {
       return;
     }
 
+    setSubmitting(true);
     const submittedAnswer = answer ? Number(answer) : null;
     const isCorrect = evaluateAnswer(submittedAnswer, question.correctAnswer);
     const responseTimeMs = Date.now() - shownAtRef.current;
@@ -159,11 +168,6 @@ export default function PracticeSessionScreen() {
 
     setResultsCount(nextResultsCount);
     setCorrectCount(nextCorrectCount);
-    setFeedback({
-      correct: isCorrect,
-      message: `${randomFeedback(isCorrect ? 'correct' : 'incorrect')} ${isCorrect ? '' : `The answer is ${question.correctAnswer}.`}`.trim(),
-    });
-
     if (question.relatedFact) {
       recentFactKeysRef.current = [
         ...recentFactKeysRef.current.slice(-2),
@@ -171,16 +175,29 @@ export default function PracticeSessionScreen() {
       ];
     }
 
-    await recordAnswer({
-      questionId: question.id,
-      operation: question.operation,
-      submittedAnswer,
-      correctAnswer: question.correctAnswer,
-      isCorrect,
-      responseTimeMs,
-      answeredAt: new Date().toISOString(),
-      relatedFact: question.relatedFact,
-    });
+    try {
+      await recordAnswer({
+        questionId: question.id,
+        operation: question.operation,
+        submittedAnswer,
+        correctAnswer: question.correctAnswer,
+        isCorrect,
+        responseTimeMs,
+        answeredAt: new Date().toISOString(),
+        relatedFact: question.relatedFact,
+      });
+
+      if (isCorrect) {
+        moveToNextQuestion(nextResultsCount, nextCorrectCount);
+      } else {
+        setFeedback({
+          correct: false,
+          message: `${randomFeedback('incorrect')} The answer is ${question.correctAnswer}.`,
+        });
+      }
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (loading || !progress || !settings || !question) {
@@ -222,14 +239,20 @@ export default function PracticeSessionScreen() {
         <Text style={styles.answer}>{answer || '—'}</Text>
         {feedback ? (
           <View style={styles.feedbackBlock}>
-            <Text style={[styles.feedback, { color: feedback.correct ? colors.success : colors.warning }]}>{feedback.message}</Text>
+            <Text style={[styles.feedback, { color: feedback.correct ? colors.success : colors.warning }]}>
+              {feedback.message}
+            </Text>
             <PrimaryButton
-              label={resultsCount >= config.questionCount || remainingSeconds === 0 ? 'See Results' : 'Next Question'}
+              label={
+                resultsCount >= config.questionCount || remainingSeconds === 0
+                  ? 'See Results'
+                  : 'Next Question'
+              }
               onPress={moveToNextQuestion}
             />
           </View>
         ) : (
-          <NumericKeypad value={answer} onChange={setAnswer} onSubmit={handleSubmit} />
+          <NumericKeypad value={answer} onChange={setAnswer} onSubmit={handleSubmit} disabled={submitting} />
         )}
       </Card>
     </Screen>
@@ -245,6 +268,8 @@ const styles = StyleSheet.create({
   progressCard: {
     flex: 1,
     minWidth: 110,
+    padding: spacing.sm,
+    gap: spacing.xs,
   },
   eyebrow: {
     fontSize: 12,
@@ -258,7 +283,7 @@ const styles = StyleSheet.create({
     color: colors.text,
   },
   prompt: {
-    fontSize: 42,
+    fontSize: 40,
     fontWeight: '800',
     color: colors.text,
     textAlign: 'center',

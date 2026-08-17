@@ -7,11 +7,23 @@ type NumericKeypadProps = {
   onChange: (value: string) => void;
   onSubmit: () => void;
   disabled?: boolean;
+  compact?: boolean;
 };
 
-const KEYS = [['1', '2', '3'], ['4', '5', '6'], ['7', '8', '9'], ['Clear', '0', '⌫']];
+const KEYS = [
+  ['1', '2', '3'],
+  ['4', '5', '6'],
+  ['7', '8', '9'],
+  ['Clear', '0', '⌫'],
+];
 
-export function NumericKeypad({ value, onChange, onSubmit, disabled = false }: NumericKeypadProps) {
+export function NumericKeypad({
+  value,
+  onChange,
+  onSubmit,
+  disabled = false,
+  compact = false,
+}: NumericKeypadProps) {
   const handlePress = (key: string) => {
     if (disabled) {
       return;
@@ -40,13 +52,29 @@ export function NumericKeypad({ value, onChange, onSubmit, disabled = false }: N
               accessibilityRole="button"
               accessibilityLabel={key === '⌫' ? 'Backspace' : key}
               onPress={() => handlePress(key)}
-              style={({ pressed }) => [styles.key, pressed ? styles.pressed : null, disabled ? styles.disabled : null]}>
+              style={({ pressed }) => [
+                styles.key,
+                compact ? styles.compactKey : null,
+                pressed ? styles.pressed : null,
+                disabled ? styles.disabled : null,
+              ]}
+            >
               <Text style={styles.keyLabel}>{key}</Text>
             </Pressable>
           ))}
         </View>
       ))}
-      <Pressable accessibilityRole="button" disabled={disabled} onPress={onSubmit} style={({ pressed }) => [styles.submit, pressed ? styles.pressed : null, disabled ? styles.disabled : null]}>
+      <Pressable
+        accessibilityRole="button"
+        disabled={disabled}
+        onPress={onSubmit}
+        style={({ pressed }) => [
+          styles.submit,
+          compact ? styles.compactSubmit : null,
+          pressed ? styles.pressed : null,
+          disabled ? styles.disabled : null,
+        ]}
+      >
         <Text style={styles.submitLabel}>Submit</Text>
       </Pressable>
     </View>
@@ -71,6 +99,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  compactKey: {
+    minHeight: 52,
+  },
   keyLabel: {
     fontSize: 24,
     fontWeight: '800',
@@ -82,6 +113,9 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  compactSubmit: {
+    minHeight: 50,
   },
   submitLabel: {
     color: '#FFFFFF',

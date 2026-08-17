@@ -12,12 +12,15 @@ type ScreenProps = {
 
 export function Screen({ children, refreshing = false, onRefresh }: ScreenProps) {
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top']}>
+    <SafeAreaView style={styles.safeArea} edges={['left', 'right', 'bottom']}>
       <ScrollView
         contentContainerStyle={styles.content}
         refreshControl={
-          onRefresh ? <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} /> : undefined
-        }>
+          onRefresh ? (
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />
+          ) : undefined
+        }
+      >
         {children}
       </ScrollView>
     </SafeAreaView>
@@ -33,5 +36,6 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     gap: spacing.md,
     paddingBottom: 48,
+    paddingTop: 0,
   },
 });

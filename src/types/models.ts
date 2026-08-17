@@ -1,9 +1,4 @@
-export type MathOperation =
-  | 'addition'
-  | 'subtraction'
-  | 'multiplication'
-  | 'division'
-  | 'mixed';
+export type MathOperation = 'addition' | 'subtraction' | 'multiplication' | 'division' | 'mixed';
 
 export type MasteryLevel = 'not-started' | 'learning' | 'developing' | 'proficient' | 'strong' | 'mastered';
 
@@ -25,6 +20,7 @@ export type UserSettings = {
   commutativeFacts: boolean;
   reducedMotion: boolean;
   dailyGoal: DailyGoal;
+  focusedOperations: Exclude<MathOperation, 'mixed'>[];
 };
 
 export type MultiplicationFact = {
