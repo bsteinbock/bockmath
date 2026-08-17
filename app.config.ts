@@ -15,6 +15,9 @@ const config: ExpoConfig = {
   ios: {
     supportsTablet: true,
     bundleIdentifier: isProduction ? 'com.bsteinbk.bockmath' : 'com.bsteinbk.bockmath.dev',
+    infoPlist: {
+      ITSAppUsesNonExemptEncryption: false,
+    },
   },
   android: {
     package: isProduction ? 'com.bsteinbk.bockmath' : 'com.bsteinbk.bockmath.dev',
