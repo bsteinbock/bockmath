@@ -34,7 +34,7 @@ const config: ExpoConfig = {
     output: 'static',
     favicon: './assets/images/favicon.png',
   },
-  plugins: ['expo-router', 'expo-dev-client'],
+  plugins: ['expo-router', 'expo-dev-client', 'expo-system-ui', 'react-native-legal'],
   experiments: {
     typedRoutes: true,
   },
@@ -45,7 +45,7 @@ const config: ExpoConfig = {
     ? {
         url: `https://u.expo.dev/${projectId}`,
         checkAutomatically: 'ON_LOAD',
-        fallbackToCacheTimeout: 0,
+        fallbackToCacheTimeout: 3000,
       }
     : undefined,
   extra: {

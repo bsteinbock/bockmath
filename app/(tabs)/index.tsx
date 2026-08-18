@@ -12,13 +12,6 @@ import { colors } from '@/src/constants/theme';
 import { useAppData } from '@/src/hooks/useAppData';
 import { MathOperation } from '@/src/types/models';
 
-const OPERATION_DESCRIPTIONS: Record<Exclude<MathOperation, 'mixed'>, string> = {
-  addition: 'Put numbers together.',
-  subtraction: 'Find what is left.',
-  multiplication: 'Build fact power.',
-  division: 'Share into equal groups.',
-};
-
 export default function HomeScreen() {
   const { loading, profile, settings, createProfile, refresh } = useAppData();
 
@@ -56,8 +49,6 @@ export default function HomeScreen() {
       {operations.map((operation) => (
         <Card key={operation} style={styles.operationCard}>
           <Text style={styles.symbol}>{SYMBOL_BY_OPERATION[operation]}</Text>
-          <Text style={styles.title}>{OPERATION_LABELS[operation]}</Text>
-          <Text style={styles.description}>{OPERATION_DESCRIPTIONS[operation]}</Text>
           <PrimaryButton
             label={`Practice ${OPERATION_LABELS[operation]}`}
             onPress={() =>
