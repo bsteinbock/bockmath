@@ -55,6 +55,7 @@ export type PracticeSessionConfig = {
   adaptive: boolean;
   selectedTables?: number[];
   selectedFacts?: MultiplicationFact[];
+  secondFactor?: number;
   timeLimitSeconds?: number;
   mode?: 'practice' | 'game';
 };

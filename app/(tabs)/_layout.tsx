@@ -32,14 +32,6 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="dashboard"
-        options={{
-          title: 'Dashboard',
-          tabBarLabel: 'Dashboard',
-          tabBarIcon: ({ color, size }) => <Ionicons name="bar-chart" color={color} size={size} />,
-        }}
-      />
-      <Tabs.Screen
         name="settings-tab"
         options={{
           title: 'Settings',

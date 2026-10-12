@@ -10,11 +10,14 @@ import { SectionHeader } from '@/src/components/SectionHeader';
 import { DIFFICULTY_LABELS, ENCOURAGING_FEEDBACK, OPERATION_LABELS } from '@/src/constants/math';
 import { colors, spacing } from '@/src/constants/theme';
 import { evaluateAnswer } from '@/src/features/math/answerEvaluator';
-import { generateQuestion } from '@/src/features/math/questionGenerator';
+import {
+  generateQuestion,
+  shuffleDivisionFacts,
+  shuffleMultiplicationFactors,
+} from '@/src/features/math/questionGenerator';
 import { selectAdaptiveMultiplicationFact } from '@/src/features/math/questionSelector';
-import { getOverallAccuracy } from '@/src/features/progress/progressSummary';
 import { useAppData } from '@/src/hooks/useAppData';
-import { MathQuestion, PracticeSessionConfig } from '@/src/types/models';
+import { MathQuestion, MultiplicationFact, PracticeSessionConfig } from '@/src/types/models';
 import { parseBooleanParam, parseCsvNumbers, parseNumberParam } from '@/src/utils/routeParams';
 
 function randomFeedback(type: 'correct' | 'incorrect'): string {
@@ -44,6 +47,8 @@ export default function PracticeSessionScreen() {
   const [remainingSeconds, setRemainingSeconds] = useState<number | null>(null);
   const shownAtRef = useRef(0);
   const recentFactKeysRef = useRef<string[]>([]);
+  const remainingSecondFactorsRef = useRef<number[]>([]);
+  const remainingDivisionFactsRef = useRef<MultiplicationFact[]>([]);
 
   const config = useMemo<PracticeSessionConfig>(() => {
     const factor1 = parseNumberParam(params.factor1, 0);
@@ -79,6 +84,22 @@ export default function PracticeSessionScreen() {
         return generateQuestion({ ...config, selectedFacts: [fact] });
       }
 
+      if (config.operation === 'multiplication') {
+        if (!remainingSecondFactorsRef.current.length) {
+          remainingSecondFactorsRef.current = shuffleMultiplicationFactors();
+        }
+        const secondFactor = remainingSecondFactorsRef.current.pop();
+        return generateQuestion({ ...config, secondFactor });
+      }
+
+      if (config.operation === 'division' && config.selectedTables?.length) {
+        if (!remainingDivisionFactsRef.current.length) {
+          remainingDivisionFactsRef.current = shuffleDivisionFacts(config.selectedTables);
+        }
+        const fact = remainingDivisionFactsRef.current.pop();
+        return fact ? generateQuestion({ ...config, selectedFacts: [fact] }) : undefined;
+      }
+
       return generateQuestion(config);
     };
   }, [config, progress, settings]);
@@ -101,10 +122,35 @@ export default function PracticeSessionScreen() {
             completedResultsCount ? Math.round((completedCorrectCount / completedResultsCount) * 100) : 0,
           ),
           averageResponseTimeMs: String(averageResponseTimeMs),
+          operation: config.operation,
+          difficulty: String(config.difficulty),
+          questionCount: String(config.questionCount),
+          adaptive: String(config.adaptive),
+          ...(config.selectedTables?.length ? { tables: config.selectedTables.join(',') } : {}),
+          ...(config.selectedFacts?.length
+            ? {
+                factor1: String(config.selectedFacts[0].factor1),
+                factor2: String(config.selectedFacts[0].factor2),
+              }
+            : {}),
+          ...(config.timeLimitSeconds ? { timeLimitSeconds: String(config.timeLimitSeconds) } : {}),
+          ...(config.mode ? { mode: config.mode } : {}),
         },
       });
     },
-    [correctCount, progress?.recentResults, resultsCount],
+    [
+      config.adaptive,
+      config.difficulty,
+      config.mode,
+      config.operation,
+      config.questionCount,
+      config.selectedFacts,
+      config.selectedTables,
+      config.timeLimitSeconds,
+      correctCount,
+      progress?.recentResults,
+      resultsCount,
+    ],
   );
 
   useEffect(() => {
@@ -223,7 +269,7 @@ export default function PracticeSessionScreen() {
         <Card style={styles.progressCard}>
           <Text style={styles.eyebrow}>Accuracy</Text>
           <Text style={styles.metric}>
-            {resultsCount ? Math.round((correctCount / resultsCount) * 100) : getOverallAccuracy(progress)}%
+            {resultsCount ? Math.round((correctCount / resultsCount) * 100) : 0}%
           </Text>
         </Card>
         {remainingSeconds !== null ? (

@@ -160,6 +160,8 @@ Support:
 - Table ranges
 - 1×1 through 12×12
 
+In regular multiplication practice, allow the learner to choose a specific table from 1 through 12 or choose random tables. The choice determines the first factor; the second factor is independently randomized from 1 through 12 for every question.
+
 There are 144 possible multiplication facts from 1×1 through 12×12.
 
 Each fact should have its own progress record.
@@ -200,6 +202,8 @@ Examples:
 
 - 56 ÷ 7 = 8
 - 72 ÷ 8 = 9
+
+Allow division practice to be filtered by one multiplication table, multiple tables, table ranges, or all tables from 1 through 12. The selected table determines the divisor. A selected-table session presents each quotient from 1 through 12 exactly once per table, in shuffled order.
 
 Do not generate fractional answers unless a future difficulty setting enables them.
 

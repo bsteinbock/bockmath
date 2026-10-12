@@ -52,15 +52,20 @@ export default function HomeScreen() {
           <PrimaryButton
             label={`Practice ${OPERATION_LABELS[operation]}`}
             onPress={() =>
-              router.navigate({
-                pathname: '/practice',
-                params: {
-                  operation,
-                  difficulty: operation === 'multiplication' || operation === 'division' ? '2' : '1',
-                  questionCount: '12',
-                  adaptive: operation === 'multiplication' ? 'true' : 'false',
-                },
-              })
+              operation === 'multiplication' || operation === 'division'
+                ? router.navigate({
+                    pathname: '/multiplication/tables',
+                    params: { operation },
+                  })
+                : router.navigate({
+                    pathname: '/practice',
+                    params: {
+                      operation,
+                      difficulty: '1',
+                      questionCount: '12',
+                      adaptive: 'false',
+                    },
+                  })
             }
           />
         </Card>

@@ -21,7 +21,10 @@ export default function RootLayout() {
         <Stack.Screen name="practice/session" options={{ title: 'Practice Session' }} />
         <Stack.Screen name="practice/results" options={{ title: 'Session Results' }} />
         <Stack.Screen name="multiplication/index" options={{ title: 'Multiplication' }} />
-        <Stack.Screen name="multiplication/tables" options={{ title: 'Tables' }} />
+        <Stack.Screen
+          name="multiplication/tables"
+          options={{ title: 'Tables', headerBackButtonDisplayMode: 'minimal' }}
+        />
         <Stack.Screen name="multiplication/fact-grid" options={{ title: 'Fact Grid' }} />
         <Stack.Screen name="games/index" options={{ title: 'Games' }} />
         <Stack.Screen name="+not-found" options={{ title: 'Not Found' }} />

@@ -1,7 +1,30 @@
-import { DIFFICULTY_RANGES, SYMBOL_BY_OPERATION } from '@/src/constants/math';
+import { DIFFICULTY_RANGES, SYMBOL_BY_OPERATION, TABLE_NUMBERS } from '@/src/constants/math';
 import { MathOperation, MathQuestion, MultiplicationFact, PracticeSessionConfig } from '@/src/types/models';
 
 export type RandomSource = () => number;
+
+export function shuffleMultiplicationFactors(rng: RandomSource = Math.random): number[] {
+  const factors = [...TABLE_NUMBERS];
+  for (let index = factors.length - 1; index > 0; index -= 1) {
+    const swapIndex = randomInt(0, index, rng);
+    [factors[index], factors[swapIndex]] = [factors[swapIndex], factors[index]];
+  }
+  return factors;
+}
+
+export function shuffleDivisionFacts(
+  tables: number[],
+  rng: RandomSource = Math.random,
+): MultiplicationFact[] {
+  const facts = tables.flatMap((factor1) =>
+    TABLE_NUMBERS.map((factor2) => ({ factor1, factor2 })),
+  );
+  for (let index = facts.length - 1; index > 0; index -= 1) {
+    const swapIndex = randomInt(0, index, rng);
+    [facts[index], facts[swapIndex]] = [facts[swapIndex], facts[index]];
+  }
+  return facts;
+}
 
 function randomInt(min: number, max: number, rng: RandomSource): number {
   return Math.floor(rng() * (max - min + 1)) + min;
@@ -49,26 +72,27 @@ export function generateSubtractionQuestion(difficulty: number, rng: RandomSourc
   };
 }
 
-function pickFact(config: Pick<PracticeSessionConfig, 'difficulty' | 'selectedTables' | 'selectedFacts'>, rng: RandomSource): MultiplicationFact {
+function pickFact(
+  config: Pick<PracticeSessionConfig, 'difficulty' | 'selectedTables' | 'selectedFacts' | 'secondFactor'>,
+  rng: RandomSource,
+): MultiplicationFact {
   if (config.selectedFacts?.length) {
     return config.selectedFacts[randomInt(0, config.selectedFacts.length - 1, rng)];
   }
 
   if (config.selectedTables?.length) {
     const factor1 = config.selectedTables[randomInt(0, config.selectedTables.length - 1, rng)];
-    const max = DIFFICULTY_RANGES.multiplication[Math.max(0, Math.min(config.difficulty - 1, 2))].max;
-    return { factor1, factor2: randomInt(1, max, rng) };
+    return { factor1, factor2: config.secondFactor ?? randomInt(1, TABLE_NUMBERS.length, rng) };
   }
 
-  const range = DIFFICULTY_RANGES.multiplication[Math.max(0, Math.min(config.difficulty - 1, 2))];
   return {
-    factor1: randomInt(range.min, range.max, rng),
-    factor2: randomInt(range.min, range.max, rng),
+    factor1: randomInt(1, TABLE_NUMBERS.length, rng),
+    factor2: config.secondFactor ?? randomInt(1, TABLE_NUMBERS.length, rng),
   };
 }
 
 export function generateMultiplicationQuestion(
-  config: Pick<PracticeSessionConfig, 'difficulty' | 'selectedTables' | 'selectedFacts'>,
+  config: Pick<PracticeSessionConfig, 'difficulty' | 'selectedTables' | 'selectedFacts' | 'secondFactor'>,
   rng: RandomSource = Math.random,
 ): MathQuestion {
   const fact = pickFact(config, rng);
@@ -91,7 +115,7 @@ export function generateDivisionQuestion(
 ): MathQuestion {
   const fact = pickFact(config, rng);
   const dividend = fact.factor1 * fact.factor2;
-  const useFirstFactorAsDivisor = rng() >= 0.5;
+  const useFirstFactorAsDivisor = Boolean(config.selectedTables?.length) || rng() >= 0.5;
   const divisor = useFirstFactorAsDivisor ? fact.factor1 : fact.factor2;
   const correctAnswer = useFirstFactorAsDivisor ? fact.factor2 : fact.factor1;
 

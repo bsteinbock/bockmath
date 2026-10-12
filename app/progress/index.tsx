@@ -44,7 +44,7 @@ export default function ProgressScreen() {
       <Card>
         <Text style={styles.title}>Strongest facts</Text>
         {summary.strongest.map((fact) => (
-          <View key={`${fact.factor1}-${fact.factor2}`} style={styles.factRow}>
+          <View key={`SL${fact.factor1}-R${fact.factor2}`} style={styles.factRow}>
             <Text style={styles.text}>
               {fact.factor1} × {fact.factor2}
             </Text>
@@ -56,7 +56,7 @@ export default function ProgressScreen() {
       <Card>
         <Text style={styles.title}>Weakest facts</Text>
         {summary.weakest.map((fact) => (
-          <View key={`${fact.factor1}-${fact.factor2}`} style={styles.factRow}>
+          <View key={`WL${fact.factor1}-R${fact.factor2}`} style={styles.factRow}>
             <Text style={styles.text}>
               {fact.factor1} × {fact.factor2}
             </Text>

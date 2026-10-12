@@ -28,12 +28,14 @@ export default function PracticeScreen() {
   }>();
   const { loading, profile, progress, settings, recordAnswer } = useAppData();
   const [resultsCount, setResultsCount] = useState(0);
+  const [correctCount, setCorrectCount] = useState(0);
   const [answer, setAnswer] = useState('');
   const [question, setQuestion] = useState<MathQuestion>();
   const [feedback, setFeedback] = useState<string>();
   const [submitting, setSubmitting] = useState(false);
   const shownAtRef = useRef(0);
   const recentFactKeysRef = useRef<string[]>([]);
+  const totalResponseTimeMsRef = useRef(0);
   const initializedSessionRef = useRef<string | undefined>(undefined);
 
   const config = useMemo<PracticeSessionConfig>(
@@ -41,7 +43,7 @@ export default function PracticeScreen() {
       operation: (params.operation as PracticeSessionConfig['operation']) ?? 'multiplication',
       difficulty: parseNumberParam(params.difficulty, 2),
       questionCount: parseNumberParam(params.questionCount, 12),
-      adaptive: parseBooleanParam(params.adaptive, true),
+      adaptive: parseBooleanParam(params.adaptive, false),
       selectedTables: parseCsvNumbers(params.tables),
     }),
     [params.adaptive, params.difficulty, params.operation, params.questionCount, params.tables],
@@ -83,7 +85,9 @@ export default function PracticeScreen() {
 
     initializedSessionRef.current = sessionKey;
     setResultsCount(0);
+    setCorrectCount(0);
     recentFactKeysRef.current = [];
+    totalResponseTimeMsRef.current = 0;
     startNextQuestion();
   }, [loading, progress, sessionKey, settings, startNextQuestion]);
 
@@ -92,8 +96,12 @@ export default function PracticeScreen() {
     setSubmitting(true);
     const submittedAnswer = answer ? Number(answer) : null;
     const isCorrect = evaluateAnswer(submittedAnswer, question.correctAnswer);
+    const responseTimeMs = Date.now() - shownAtRef.current;
     const nextResultsCount = resultsCount + 1;
+    const nextCorrectCount = correctCount + (isCorrect ? 1 : 0);
     setResultsCount(nextResultsCount);
+    setCorrectCount(nextCorrectCount);
+    totalResponseTimeMsRef.current += responseTimeMs;
     if (question.relatedFact) {
       recentFactKeysRef.current = [
         ...recentFactKeysRef.current.slice(-2),
@@ -107,12 +115,25 @@ export default function PracticeScreen() {
         submittedAnswer,
         correctAnswer: question.correctAnswer,
         isCorrect,
-        responseTimeMs: Date.now() - shownAtRef.current,
+        responseTimeMs,
         answeredAt: new Date().toISOString(),
         relatedFact: question.relatedFact,
       });
       if (nextResultsCount >= config.questionCount) {
-        router.navigate('/dashboard');
+        router.replace({
+          pathname: '/practice/results',
+          params: {
+            correct: String(nextCorrectCount),
+            total: String(nextResultsCount),
+            accuracy: String(Math.round((nextCorrectCount / nextResultsCount) * 100)),
+            averageResponseTimeMs: String(Math.round(totalResponseTimeMsRef.current / nextResultsCount)),
+            operation: config.operation,
+            difficulty: String(config.difficulty),
+            questionCount: String(config.questionCount),
+            adaptive: String(config.adaptive),
+            ...(config.selectedTables?.length ? { tables: config.selectedTables.join(',') } : {}),
+          },
+        });
       } else if (isCorrect) {
         startNextQuestion();
       } else {
