@@ -83,7 +83,7 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   operationCard: { alignItems: 'center' },
-  symbol: { color: colors.primary, fontSize: 40, fontWeight: '800' },
+  symbol: { color: colors.primary, fontSize: 30, fontWeight: '700' },
   title: { color: colors.text, fontSize: 22, fontWeight: '800', textAlign: 'center' },
   description: { color: colors.textMuted, fontSize: 16, lineHeight: 22, textAlign: 'center' },
 });
